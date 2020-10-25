@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="communityMapper">
+
+	<!-- 리스트 보기 -->
+	<select id="communityALl" resultType="com.review.dto.CommunityDTO">
+	 <![CDATA[
+	 select * from (
+		 	select rownum rn, cc.*from community cc where rownum < #{start}+10 order by ref desc, re_step asc
+		 	)  where rn >= #{start}  order by cno desc
+   ]]>
+	</select>
+	<!-- MySQL -->
+	<!-- select * from comm order by cno desc, ref desc, re_step asc limit #{start},#{cnt} -->
+
+	<!-- 글 쓰기 (원글 &답글) -->
+	<insert id="insertCommunity" parameterType="com.review.dto.CommunityDTO">
+		insert into community (cno,mid,subject,content,ref,re_step,re_level)
+		values (community_seq.nextval,#{mid},#{subject},#{content},#{ref},#{re_step},#{re_level})
+	</insert>
+
+	<!-- 글수정 -->
+	<update id="updateCommunity" parameterType="com.review.dto.CommunityDTO">
+		update community set subject=#{subject}, content=#{content} where cno=#{cno}
+	</update>
+
+	<!-- 글 삭제 -->
+	<delete id="deleteCommunity" parameterType="int">
+		delete from community where cno=#{cno}
+	</delete>
+
+	<!-- 글 내용보기 -->
+	<select id="detailCommunity" parameterType="int" resultType="com.review.dto.CommunityDTO">
+		select * from community where cno=#{cno}
+	</select>
+
+	<!-- 글 갯수 -->
+	<select id="cntCommunity" resultType="int">
+		select count(*) from community
+	</select>
+
+	<!-- 최대 글번호 얻기 -->
+	<select id="maxNumber" resultType="int">
+		select max(cno) from community
+	</select>
+
+	<!-- 달글 끼워넣기 step -->
+	<update id="reStep" parameterType="com.review.dto.CommunityDTO">
+		update community set re_step=re_step+1 where ref=#{ref} and	re_step>#{re_step}
+	</update>
+
+	<!-- 조횟수 -->
+	<update id="hit">
+		update community set hit=hit+1 where cno=#{cno}
+	</update>
+
+</mapper>

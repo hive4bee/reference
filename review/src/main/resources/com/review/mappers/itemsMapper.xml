@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="itemsMapper">
+
+	<!-- Tour -->
+
+	<!--글쓰기 -->
+	<insert id="insertTour" parameterType="com.review.dto.TourDTO">
+		insert into tours (tno,tname,tcontent,tstart,tend,tlocation,timg,mid)
+		values (tours_seq.nextval,#{tname},#{tcontent},to_date(#{tstart},'Yyyy/MM/dd'),to_date(#{tend},'yyyy/MM/dd'),#{tlocation},#{timg},#{mid})
+	</insert>
+
+	<!--글수정 -->
+	<update id="updateTour" parameterType="com.review.dto.TourDTO">
+		update tours set tname=#{tname},tcontent=#{tcontent},tstart=#{tstart},tend=#{tend},timg=#{timg},tlocation=#{tlocation}
+		where tno=#{tno}
+	</update>
+
+	<!--글삭제 -->
+	<delete id="deleteTour" parameterType="int">
+		delete from tours where	tno=#{tno}
+	</delete>
+
+	<!-- 글내용보기 -->
+	<select id="detailTour" parameterType="int" resultType="com.review.dto.TourDTO">
+		select * from tours where tno=#{tno}
+	</select>
+
+	<!-- 리스트 -->
+	<select id="tourAll" parameterType="java.util.HashMap" resultType="com.review.dto.TourDTO">
+			<![CDATA[
+			select * from (select /*+INDEX_DESC(tours tno) */
+						rownum rn, tt.* from tours tt where rownum <= #{pageNum} * #{amount})
+						where rn > (#{pageNum}-1) * #{amount}
+						order by tno DESC
+		]]>
+	</select>
+
+	<!-- 글 갯수 for Paging -->
+	<select id="cntTour" resultType="int">
+		select count(*) from tours
+	</select>
+	
+	<!-- 좋아요 ok -->
+	<insert id="goodTour">
+		insert into tourslike (tlno,tno, mid) values (tourslike_seq.nextval,#{tno},#{mid})
+	</insert>
+	
+	<!-- 좋아요 취소 -->
+	<delete id="nogoodTour">
+		delete from tourslike where tno=#{tno} and mid=#{mid}
+	</delete>
+	
+	<!-- tours 좋아요수 수정  -->
+	<update id="likeTour">
+		update tours set tlike=
+											(select count(*) from tourslike where tno=#{tno})
+											 where tno=#{tno}
+	</update>
+	
+	<!-- 좋아요수  -->
+	<select id="cntLikeTour" resultType="int">
+		select count(tlno) from tourslike where tno=#{tno} and mid=#{mid}
+	</select>
+
+
+	<!-- food -->
+
+	<!--글쓰기 -->
+	<insert id="insertFood" parameterType="com.review.dto.FoodDTO">
+		insert into foods (fno,fname,fmenu,fcontent,fimg,faddr,mid)
+		values (foods_seq.nextval,#{fname},#{fmenu},#{fcontent},#{fimg},#{faddr},#{mid})
+	</insert>
+
+	<!--글삭제 -->
+	<delete id="deleteFood" parameterType="int">
+		delete from foods where fno=#{fno}
+	</delete>
+
+	<!-- 글내용보기 -->
+	<select id="detailFood" parameterType="int" resultType="com.review.dto.FoodDTO">
+		select * from foods where fno=#{fno}
+	</select>
+
+	<!-- 리스트 -->
+	<select id="foodAll" parameterType="java.util.HashMap" resultType="com.review.dto.FoodDTO">
+	<![CDATA[
+			select * from (select /*+INDEX_DESC(foods fno) */
+						rownum rn, ff.* from foods ff where rownum <= #{pageNum} * #{amount})
+						where rn > (#{pageNum}-1) * #{amount}
+						order by fno desc
+		]]>
+	</select>
+
+	<!-- 글 갯수 for Paging -->
+	<select id="cntFood" resultType="int">
+		select count(*) from foods
+	</select>
+	
+	<!-- 별점 평균 -->
+	<update id="cntFoodStar" parameterType="int">
+		update foods set fstar=(select avg(frstar) from foodsreview where fno=#{fno}) where fno=#{fno}
+	</update>
+	
+	<!-- 리뷰 쓰기 -->
+	<insert id="insertFoodReview" parameterType="com.review.dto.FoodReviewDTO">
+		insert into foodsreview (frno,fno,frstar,frcontent,mid)
+		values (foods_seq.nextval,#{fno},#{frstar},#{frcontent},#{mid})
+	</insert>
+	
+	<!--리뷰 삭제 -->
+	<delete id="deleteFoodReview" parameterType="int">
+		delete from foodsreview where frno=#{frno}
+	</delete>
+
+	<!-- 리스트 -->
+	<select id="foodReviewAll" resultType="com.review.dto.FoodReviewDTO">
+ 		select * from foodsreview where fno=#{fno} order by fno desc, indate desc 
+	</select>
+
+	<!-- 글 갯수 for Paging -->
+	<select id="cntFoodReview" resultType="int">
+		select count(*) from cntFoodReview where fno=#{fno}
+	</select>
+
+	<update id="modifyFoodReview">
+		update foodsreview
+		SET frcontent=#{frcontent}
+		WHERE frno=#{frno}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	<!--book -->
+
+	<!--글쓰기 -->
+	<insert id="insertBook" parameterType="com.review.dto.BookDTO">
+		insert into books (bno,bname,bauthor,bimg,bcontent,mid)
+		values (books_seq.nextval,#{bname},#{bauthor},#{bimg},#{bcontent},#{mid})
+	</insert>
+
+	<!--글수정 -->
+	<update id="updateBook" parameterType="com.review.dto.BookDTO">
+		update books set bname=#{bname},bauthor=#{bauthor},bimg=#{bimg},bcontent=#{bcontent} where bno=#{bno}
+	</update>
+
+	<!--글삭제 -->
+	<delete id="deleteBook" parameterType="int">
+		delete from books where	bno=#{bno}
+	</delete>
+
+	<!-- 글내용보기 -->
+	<select id="detailBook" parameterType="int"	resultType="com.review.dto.BookDTO">
+		select * from books where bno=#{bno}
+	</select>
+
+	<!-- 리스트  -->
+	<select id="bookAll" parameterType="java.util.HashMap" resultType="com.review.dto.BookDTO">
+	<![CDATA[
+			select * from (select /*+INDEX_DESC(books bno) */
+						rownum rn, bb.* from books bb where rownum <= #{pageNum} * #{amount})
+						where rn > (#{pageNum}-1) * #{amount}
+						order by bno desc
+		]]>
+	</select>
+
+	<!-- 글 갯수 for Paging -->
+	<select id="cntBook" parameterType="java.util.HashMap" resultType="int">
+		<!-- select count(bno) from books -->
+		select count(*) from books
+	</select>
+		
+	<!-- 리뷰 입력 -->
+	<insert id="insertBookReview" parameterType="com.review.dto.BookReviewDTO">
+<!-- 		<selectKey keyProperty="brno" resultType="int" order="BEFORE"> 대문자 확인 -->
+<!-- 			select booksreview_seq.nextval from dual -->
+<!-- 		</selectKey> -->
+		insert into booksreview(brno,bno,ref,depth,brcontent,mid)
+		values (booksreview_seq.nextval,#{bno},#{ref},#{depth},#{brcontent},#{mid})
+	</insert>
+	
+	<!-- 리뷰삭제 -->
+	<delete id="deleteBookReview" parameterType="int">
+		delete from booksreview where brno=#{brno}
+	</delete>
+	
+	<!-- 리뷰 리스트 -->
+	<select id="bookReviewAll" resultType="com.review.dto.BookReviewDTO">
+		select * from booksreview where bno=#{bno} order by brno desc
+	</select>
+	
+	<!-- 댓글 갯수 for Paging -->
+	<select id="cntBookReview" resultType="int">
+ 		select count(*) from booksreview where bno=#{bno}
+	</select>
+	
+	<!-- 리뷰수 변경 -->
+	<update id="cntBookView">
+		update books set bcnt=(select count(*) from booksreview where bno=#{bno}) where bno=#{bno}
+	</update>
+	
+	<!-- 리뷰 통합삭제 -->
+	<delete id="deleteBookReveiwAll" parameterType="java.util.HashMap">
+		delete from booksreview where brno in
+														(select brno from booksreview where brno=#{brno})
+														or
+														ref in
+														(select brno from booksreview where brno=#{brno})
+	</delete>
+
+</mapper>
+
+<!-- 1. 일반적인 오라클 페이징 처리 SELECT * FROM ( SELECT A.*,ROWNUM AS RNUM,FLOOR((ROWNUM-1)/{디스플레이수}+1) 
+	AS PAGE, COUNT(*) OVER() AS TOTCNT FROM ( {검색쿼리 - 정렬이 필요할 경우 정렬조건 포함} ) A 
+	) WHERE PAGE = {페이지번호}; OR SELECT * FROM ( SELECT A.*, ROWNUM AS RNUM, COUNT(*) 
+	OVER() AS TOTCNT FROM ( {검색쿼리 - 정렬이 필요할 경우 정렬조건 포함} ) A) WHERE RNUM > {범위부터} 
+	AND RNUM <= {범위까지};
+	 2. 오라클 대용량 페이징 처리 SELECT * FROM ( SELECT ROWNUM AS RNUM, 
+	A.* FROM ( {검색쿼리 - 정렬이 필요할 경우 정렬조건 포함} ) A WHERE ROWNUM <= {범위까지} ) WHERE 
+	RNUM > {범위부터}; OR SELECT * FROM ( SELECT /*+ INDEX_ASC or INDEX_DESC(A {정렬조건 
+	인덱스명}) */ ROWNUM AS RNUM, A.* FROM ( {검색쿼리 - 정렬이 필요한 경우 정렬조건을 포함하지 않고 ORACLE 
+	힌트사용} ) A WHERE ROWNUM <= {범위까지} ) WHERE RNUM > {범위부터}; -->
